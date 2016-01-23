@@ -14,7 +14,7 @@ const (
 )
 
 const (
-	ErrCheckMissingCommand = iota
+	ErrInvalidConfig = iota
 )
 
 type Error struct {
@@ -37,7 +37,7 @@ type Checker interface {
 type Publisher interface {
 	Start() error
 	Stop() error
-	Configure(map[string]interface{}) error
+	Configure(cfg map[string]interface{}) error
 	Publish(*CheckResult) error
 }
 

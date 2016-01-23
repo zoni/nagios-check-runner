@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 // Config describes the full agent configuration.
@@ -24,12 +25,24 @@ func ReadConfig(src io.Reader) (*Config, error) {
 	}
 
 	c := &Config{}
-	err = yaml.Unmarshal(data, c)
-	if err != nil {
+	if err = yaml.Unmarshal(data, c); err != nil {
 		return nil, err
 	}
 
-	for name, check := range c.Checks {
+	if err = parseChecks(c); err != nil {
+		return nil, err
+	}
+
+	if err = parsePublishers(c); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+// parseChecks is a helper function to ReadConfig.
+func parseChecks(cfg *Config) error {
+	for name, check := range cfg.Checks {
 		if check.Name == "" {
 			check.Name = name
 		}
@@ -45,18 +58,39 @@ func ReadConfig(src io.Reader) (*Config, error) {
 
 		splitArgs, err := shellquote.Split(check.Command)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if len(splitArgs) < 1 {
-			return nil, Error{
-				Code:    ErrCheckMissingCommand,
+			return Error{
+				Code:    ErrInvalidConfig,
 				Message: fmt.Sprintf("Check '%s' is missing a command to execute", name),
 			}
 		}
 		check.Args = splitArgs
 
-		c.Checks[name] = check
+		cfg.Checks[name] = check
+	}
+	return nil
+}
+
+// parsePublishers is a helper function to ReadConfig.
+func parsePublishers(cfg *Config) error {
+	for label, publisher := range cfg.Publishers {
+		_, found := publisher["type"]
+		if !found {
+			publisher["type"] = label + "publisher"
+		}
+		t, ok := publisher["type"].(string)
+		if !ok {
+			return Error{
+				Code:    ErrInvalidConfig,
+				Message: fmt.Sprintf("Type field of publisher '%s' should be a string", label),
+			}
+		}
+		publisher["type"] = strings.ToLower(t)
 	}
 
-	return c, nil
+	return nil
 }
+
+//func makePublishersFromConfig(

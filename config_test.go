@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"gopkg.in/stretchr/testify.v1/assert"
 	"gopkg.in/stretchr/testify.v1/require"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -32,6 +33,7 @@ func TestEmptyConfig(t *testing.T) {
 	require.Nil(t, err)
 
 	a.Equal(0, len(cfg.Checks))
+	a.Equal(0, len(cfg.Publishers))
 }
 
 func TestRegularConfig(t *testing.T) {
@@ -41,8 +43,8 @@ func TestRegularConfig(t *testing.T) {
 	cfg, err := ReadConfig(bytes.NewReader(defaultConfig))
 	r.Nil(err)
 
-	a.Equal("testhost", cfg.Hostname)
 	a.Equal(5, len(cfg.Checks))
+	a.Equal(1, len(cfg.Publishers))
 }
 
 func TestChecks(t *testing.T) {
@@ -53,8 +55,8 @@ func TestChecks(t *testing.T) {
 	a.Nil(err)
 	_, err = ReadConfig(strings.NewReader("checks: { invalid: {} }"))
 	a.NotNil(err)
-	if errt, ok := err.(Error); !ok || errt.Code != ErrCheckMissingCommand {
-		t.Error("Expected error to be ErrCheckMissingCommand")
+	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
+		t.Error("Expected error to be ErrInvalidConfig")
 	}
 
 	cfg, err := ReadConfig(bytes.NewReader(defaultConfig))
@@ -80,4 +82,47 @@ func TestChecks(t *testing.T) {
 	a.Equal(5, check.Interval)
 	a.Equal(3, check.Retry)
 	a.Equal(3, check.Timeout)
+}
+
+func TestPublisherType(t *testing.T) {
+	var cases = []struct {
+		name   string
+		reader io.Reader
+	}{
+		{"default", bytes.NewReader(defaultConfig)},
+		{"notype", strings.NewReader("publishers: {memory: {}}")},
+		{"caseinsensitive", strings.NewReader("publishers: {memory: {type: MEMORYPUBLISHER}}")},
+	}
+
+	for _, testcase := range cases {
+		cfg, err := ReadConfig(testcase.reader)
+		if err != nil {
+			t.Fatalf("ReadConfig returned error for case %q: %s", testcase.name, err)
+		}
+
+		_, ok := cfg.Publishers["memory"]
+		if !ok {
+			t.Errorf("Expected 'memory' publisher not found (case %q)", testcase.name)
+			continue
+		}
+		v, ok := cfg.Publishers["memory"]["type"]
+		if !ok {
+			t.Errorf("Expected 'type' element under 'memory' publisher (case %q)", testcase.name)
+		}
+		switch publisherType := v.(type) {
+		case string:
+			if publisherType != "memorypublisher" {
+				t.Errorf("Expected 'type' to have value 'memorypublisher', not %q (case %q)", publisherType, testcase.name)
+			}
+		default:
+			t.Errorf("Expected 'type' element to be a string, not %T (case %q)", publisherType, testcase.name)
+		}
+	}
+}
+
+func TestPublisherWrongType(t *testing.T) {
+	_, err := ReadConfig(strings.NewReader("publishers: {memory: {type: []}}"))
+	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
+		t.Error("Expected error to be ErrInvalidConfig")
+	}
 }
