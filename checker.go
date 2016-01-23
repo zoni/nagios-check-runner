@@ -22,34 +22,44 @@ type Check struct {
 
 // checker is responsible for the scheduling and running of checks.
 type checker struct {
-	publish chan *checkResult // The publish channel exposed by the Runner
+	publish chan *CheckResult // Channel to publish check results on
 	done    chan struct{}     // Used for signalling goroutines that we're shutting down
 	checks  map[string]Check  // The checks that need to be run
 	log     log.Logger
 }
 
-// checkResult describes the result of a given check.
-type checkResult struct {
-	Name       string
-	Output     []byte
-	Returncode int
+// CheckResult describes the result of a given check.
+type CheckResult struct {
+	Name       string // Check name
+	Output     []byte // Output returned by the command
+	Returncode int    // Exitcode of the command
 }
 
-func (c *checker) Start() error {
+// RegisterChecks sets the checks to be run. It must be called before
+// Start().
+func (c *checker) RegisterChecks(checks map[string]Check) {
+	c.checks = checks
+}
+
+// Start starts the checker. It returns a channel to which check
+// results will be published.
+func (c *checker) Start() (chan *CheckResult, error) {
 	c.log = Log.New("component", "checker")
 	c.log.Info("Checker starting")
 	c.done = make(chan struct{})
+	c.publish = make(chan *CheckResult)
 
 	for _, check := range c.checks {
 		go c.checkRoutine(check)
 	}
-	//go c.run()
-	return nil
+	return c.publish, nil
 }
 
+// Stop the checker. This will close the publish channel returned by Start()
 func (c *checker) Stop() error {
 	c.log.Info("Checker stopping")
 	close(c.done)
+	close(c.publish)
 	return nil
 }
 
@@ -66,7 +76,9 @@ func (c *checker) checkRoutine(check Check) {
 		case <-time.After(delay):
 			l.Debug("Executing check")
 			result := runCheck(check)
+			l.Debug("Publishing check result")
 			c.publish <- result
+			l.Debug("Result published")
 			if result.Returncode == 0 {
 				delay = time.Duration(check.Interval) * time.Second
 			} else {
@@ -78,11 +90,10 @@ func (c *checker) checkRoutine(check Check) {
 			return
 		}
 	}
-
 }
 
 // runCheck runs a given check and returns the result of its execution.
-func runCheck(check Check) *checkResult {
+func runCheck(check Check) *CheckResult {
 	//dummy := &checkResult{
 	//name:       check.Name,
 	//output:     []byte("Fake output"),
@@ -91,7 +102,7 @@ func runCheck(check Check) *checkResult {
 	//return dummy
 	checkLog := Log.New("check", check.Name)
 	cmd := exec.Command(check.Args[0], check.Args[1:]...)
-	result := &checkResult{Name: check.Name}
+	result := &CheckResult{Name: check.Name}
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b

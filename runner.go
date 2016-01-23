@@ -10,11 +10,12 @@ import (
 // Runner is the main component of the application. It runs the Checker and
 // Publisher subcomponents and facilitates communication between them.
 type Runner struct {
-	config    Config
-	publish   chan *checkResult
-	checker   *checker
-	publisher *publisher
-	log       log.Logger
+	config      Config
+	checker     *checker
+	publisher   *publisher
+	publishChan chan *CheckResult // The cchannel check results are received from
+	log         log.Logger
+	done        chan struct{} // Used for signalling goroutines that we're shutting down
 }
 
 // NewRunner creates a new Runner with the given configuration.
@@ -49,9 +50,9 @@ func NewRunnerFromFile(filename string) (*Runner, error) {
 func (r *Runner) Init(cfg Config) error {
 	r.config = cfg
 	r.log = Log.New("component", "runner")
-	r.publish = make(chan *checkResult)
-	r.checker = &checker{publish: r.publish, checks: r.config.Checks}
-	r.publisher = &publisher{publish: r.publish}
+	r.checker = &checker{}
+	r.checker.RegisterChecks(r.config.Checks)
+	r.publisher = &publisher{}
 	return nil
 }
 
@@ -59,9 +60,25 @@ func (r *Runner) Init(cfg Config) error {
 // complete.
 func (r *Runner) Start() error {
 	r.log.Info("Runner starting")
-	r.checker.Start()
+	r.done = make(chan struct{})
+
+	r.publishChan, _ = r.checker.Start()
 	r.publisher.Start()
+	go r.process()
 	return nil
+}
+
+// process reads results produced by the checker and distributes them
+// to the publishers.
+func (r *Runner) process() {
+	for {
+		select {
+		case result := <-r.publishChan:
+			r.publisher.Publish(result)
+		case <-r.done:
+			return
+		}
+	}
 }
 
 // Stop stops and shuts down the Runner.

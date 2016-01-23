@@ -47,7 +47,10 @@ func ReadConfig(src io.Reader) (*Config, error) {
 			return nil, err
 		}
 		if len(splitArgs) < 1 {
-			return nil, fmt.Errorf("Check '%s' is missing a command to execute", name)
+			return nil, Error{
+				Code:    ErrCheckMissingCommand,
+				Message: fmt.Sprintf("Check '%s' is missing a command to execute", name),
+			}
 		}
 		check.Args = splitArgs
 

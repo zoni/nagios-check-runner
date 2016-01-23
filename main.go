@@ -13,6 +13,34 @@ const (
 	StateUnknown  = 3
 )
 
+const (
+	ErrCheckMissingCommand = iota
+)
+
+type Error struct {
+	Code    int
+	Message string
+}
+
+func (e Error) Error() string {
+	return e.Message
+}
+
+// Checker schedules and executes checks to be run.
+type Checker interface {
+	Start() (chan *CheckResult, error)
+	Stop() error
+	RegisterChecks(checks map[string]Check)
+}
+
+// Publisher publishes CheckResults.
+type Publisher interface {
+	Start() error
+	Stop() error
+	Publish(*CheckResult) error
+	SetConfig(interface{}) error
+}
+
 func init() {
 	Log.SetHandler(log.DiscardHandler())
 }

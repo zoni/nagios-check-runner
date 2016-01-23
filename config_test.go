@@ -53,6 +53,9 @@ func TestChecks(t *testing.T) {
 	a.Nil(err)
 	_, err = ReadConfig(strings.NewReader("checks: { invalid: {} }"))
 	a.NotNil(err)
+	if errt, ok := err.(Error); !ok || errt.Code != ErrCheckMissingCommand {
+		t.Error("Expected error to be ErrCheckMissingCommand")
+	}
 
 	cfg, err := ReadConfig(bytes.NewReader(defaultConfig))
 	r.Nil(err)
