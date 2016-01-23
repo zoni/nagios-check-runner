@@ -83,20 +83,27 @@ func (r *Runner) Start() error {
 // process reads results produced by the checker and distributes them
 // to the publishers.
 func (r *Runner) process() {
+	r.log.Debug("process() loop start")
 	for {
 		select {
 		case result := <-r.publishChan:
 			if result == nil {
 				continue
 			}
-			for _, publisher := range r.publishers {
-				publisher.Publish(result)
+			for label, publisher := range r.publishers {
+				l := r.log.New("check", result.Name, "publisher", label)
+				l.Debug("Publishing check result to publisher")
+				if err := publisher.Publish(result); err != nil {
+					l.Warn("Error publishing check result", "error", err)
+				} else {
+					l.Debug("Check result published")
+				}
 			}
 		case <-r.done:
-			break
+			return
 		}
-		break
 	}
+	r.log.Debug("process() loop end")
 }
 
 // Stop stops and shuts down the Runner.

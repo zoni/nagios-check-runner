@@ -1,0 +1,12 @@
+
+---
+
+publishers:
+  memory:
+    type: MemoryPublisher
+
+checks:
+  criticalcheck:
+    command: testdata/check_dummy 2
+    interval: 10
+    retry: 1

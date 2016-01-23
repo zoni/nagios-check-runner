@@ -89,7 +89,7 @@ func TestChecks(t *testing.T) {
 		t.Fatal("Expected 'Dummy OK' check not found")
 	}
 	a.Equal("Custom check", check.Name)
-	a.Equal(5, check.Interval)
+	a.Equal(10, check.Interval)
 	a.Equal(3, check.Retry)
 	a.Equal(3, check.Timeout)
 }
@@ -140,5 +140,4 @@ func TestPublisherWrongType(t *testing.T) {
 	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
 		t.Error("Expected error with code ErrInvalidConfig")
 	}
-
 }
