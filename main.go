@@ -37,8 +37,8 @@ type Checker interface {
 type Publisher interface {
 	Start() error
 	Stop() error
+	Configure(map[string]interface{}) error
 	Publish(*CheckResult) error
-	SetConfig(interface{}) error
 }
 
 func init() {

@@ -12,7 +12,7 @@ import (
 type Runner struct {
 	config      Config
 	checker     *checker
-	publishers  map[string]*publisher
+	publishers  map[string]Publisher
 	publishChan chan *CheckResult // The cchannel check results are received from
 	log         log.Logger
 	done        chan struct{} // Used for signalling goroutines that we're shutting down
@@ -53,16 +53,15 @@ func (r *Runner) Init(cfg Config) error {
 	r.checker = &checker{}
 	r.checker.RegisterChecks(r.config.Checks)
 
-	r.publishers = make(map[string]*publisher)
+	r.publishers = make(map[string]Publisher)
 	for label, config := range cfg.Publishers {
-		p := &publisher{}
-		if err := p.SetConfig(config); err != nil {
+		p := &SpewPublisher{}
+		if err := p.Configure(config); err != nil {
 			r.log.Error("Invalid publisher configuration", "publisher", label, "error", err)
 			return err
 		}
 		r.publishers[label] = p
 	}
-	//r.publisher.SetConfig(r.config.Publisher)
 
 	return nil
 }
