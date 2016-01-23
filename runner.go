@@ -91,13 +91,15 @@ func (r *Runner) process() {
 				continue
 			}
 			for label, publisher := range r.publishers {
-				l := r.log.New("check", result.Name, "publisher", label)
-				l.Debug("Publishing check result to publisher")
-				if err := publisher.Publish(result); err != nil {
-					l.Warn("Error publishing check result", "error", err)
-				} else {
-					l.Debug("Check result published")
-				}
+				go func() {
+					l := r.log.New("check", result.Name, "publisher", label)
+					l.Debug("Publishing check result to publisher")
+					if err := publisher.Publish(result); err != nil {
+						l.Warn("Error publishing check result", "error", err)
+					} else {
+						l.Debug("Check result published")
+					}
+				}()
 			}
 		case <-r.done:
 			return
