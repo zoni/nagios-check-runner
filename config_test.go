@@ -133,6 +133,12 @@ func TestPublisherType(t *testing.T) {
 func TestPublisherWrongType(t *testing.T) {
 	_, err := ReadConfig(strings.NewReader("publishers: {memory: {type: []}}"))
 	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
-		t.Error("Expected error to be ErrInvalidConfig")
+		t.Error("Expected error with code ErrInvalidConfig")
 	}
+
+	_, err = ReadConfig(strings.NewReader("publishers: { invalid: {} }"))
+	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
+		t.Error("Expected error with code ErrInvalidConfig")
+	}
+
 }

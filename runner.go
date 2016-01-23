@@ -54,7 +54,8 @@ func (r *Runner) Init(cfg Config) error {
 
 	r.publishers = make(map[string]Publisher)
 	for label, config := range cfg.Publishers {
-		p := &SpewPublisher{}
+		ptype := config["type"].(string)
+		p := newPublisher(ptype)
 		if err := p.Configure(config); err != nil {
 			r.log.Error("Invalid publisher configuration", "publisher", label, "error", err)
 			return err

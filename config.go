@@ -90,10 +90,16 @@ func parsePublishers(cfg *Config) error {
 				Message: fmt.Sprintf("Type field of publisher '%s' should be a string", label),
 			}
 		}
-		publisher["type"] = strings.ToLower(t)
+		ptype := strings.ToLower(t)
+		publisher["type"] = ptype
+
+		if _, found := publisherFactories[ptype]; !found {
+			return Error{
+				Code:    ErrInvalidConfig,
+				Message: fmt.Sprintf("No publisher named %q available", ptype),
+			}
+		}
 	}
 
 	return nil
 }
-
-//func makePublishersFromConfig(
