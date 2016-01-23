@@ -32,6 +32,15 @@ func LoadConfig(src io.Reader) (*Config, error) {
 		if check.Name == "" {
 			check.Name = name
 		}
+		if check.Interval < 1 {
+			check.Interval = 60
+		}
+		if check.Retry < 1 {
+			check.Retry = 60
+		}
+		if check.Timeout < 1 {
+			check.Timeout = 10
+		}
 
 		splitArgs, err := shellquote.Split(check.Command)
 		if err != nil {

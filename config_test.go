@@ -65,13 +65,16 @@ func TestChecks(t *testing.T) {
 	a.Equal("Dummy OK", check.Name)
 	a.Equal("/usr/lib/nagios/plugins/check_dummy 0", check.Command)
 	a.Equal([]string{"/usr/lib/nagios/plugins/check_dummy", "0"}, check.Args)
-	a.Equal(5, check.Interval)
-	a.Equal(3, check.Retry)
-	a.Equal(3, check.Timeout)
+	a.Equal(60, check.Interval)
+	a.Equal(60, check.Retry)
+	a.Equal(10, check.Timeout)
 
 	check, ok = cfg.Checks["Custom"]
 	if !ok {
 		t.Fatal("Expected 'Dummy OK' check not found")
 	}
 	a.Equal("Custom check", check.Name)
+	a.Equal(5, check.Interval)
+	a.Equal(3, check.Retry)
+	a.Equal(3, check.Timeout)
 }
