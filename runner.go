@@ -1,7 +1,6 @@
 package nca
 
 import (
-	//"github.com/davecgh/go-spew/spew"
 	log "gopkg.in/inconshreveable/log15.v2"
 	"os"
 	"os/signal"
@@ -86,12 +85,16 @@ func (r *Runner) process() {
 	for {
 		select {
 		case result := <-r.publishChan:
+			if result == nil {
+				continue
+			}
 			for _, publisher := range r.publishers {
 				publisher.Publish(result)
 			}
 		case <-r.done:
-			return
+			break
 		}
+		break
 	}
 }
 

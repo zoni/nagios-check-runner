@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "gopkg.in/inconshreveable/log15.v2"
 	"os/exec"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -24,6 +25,7 @@ type Check struct {
 type checker struct {
 	publish chan *CheckResult // Channel to publish check results on
 	done    chan struct{}     // Used for signalling goroutines that we're shutting down
+	wg      sync.WaitGroup    // Used together with the above to wait until goroutines finished
 	checks  map[string]Check  // The checks that need to be run
 	log     log.Logger
 }
@@ -50,6 +52,7 @@ func (c *checker) Start() (chan *CheckResult, error) {
 	c.publish = make(chan *CheckResult)
 
 	for _, check := range c.checks {
+		c.wg.Add(1)
 		go c.checkRoutine(check)
 	}
 	return c.publish, nil
@@ -59,6 +62,7 @@ func (c *checker) Start() (chan *CheckResult, error) {
 func (c *checker) Stop() error {
 	c.log.Info("Checker stopping")
 	close(c.done)
+	c.wg.Wait()
 	close(c.publish)
 	return nil
 }
@@ -66,6 +70,7 @@ func (c *checker) Stop() error {
 // checkRoutine runs a given check at the configured interval. It is meant to
 // be run in its own goroutine.
 func (c *checker) checkRoutine(check Check) {
+	defer c.wg.Done()
 	l := c.log.New("check", check.Name)
 	l.Debug("Check scheduled", "interval", check.Interval, "retry_interval", check.Retry, "command", check.Command, "timeout", check.Timeout)
 	//time.Sleep(check.Retry * time.Second)
