@@ -33,6 +33,7 @@ func NewRunnerFromFile(filename string) (*Runner, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	cfg, err := LoadConfig(f)
 	if err != nil {
 		return nil, err
