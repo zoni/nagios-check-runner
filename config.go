@@ -26,7 +26,10 @@ func ReadConfig(src io.Reader) (*Config, error) {
 
 	c := &Config{}
 	if err = yaml.Unmarshal(data, c); err != nil {
-		return nil, err
+		return nil, Error{
+			Code:    ErrInvalidConfig,
+			Message: err.Error(),
+		}
 	}
 
 	if err = parseChecks(c); err != nil {

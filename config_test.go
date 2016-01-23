@@ -47,6 +47,16 @@ func TestRegularConfig(t *testing.T) {
 	a.Equal(1, len(cfg.Publishers))
 }
 
+func TestBadConfig(t *testing.T) {
+	_, err := ReadConfig(strings.NewReader("invalid: {"))
+	if err == nil {
+		t.Error("Expected error not to be nil")
+	}
+	if errt, ok := err.(Error); !ok || errt.Code != ErrInvalidConfig {
+		t.Error("Expected error to be ErrInvalidConfig")
+	}
+}
+
 func TestChecks(t *testing.T) {
 	a := assert.New(t)
 	r := require.New(t)
