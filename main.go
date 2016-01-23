@@ -35,9 +35,20 @@ type Checker interface {
 
 // Publisher publishes CheckResults.
 type Publisher interface {
+	// Start tells a Publisher to start so it can begin accepting check results.
+	// It should be called after Configure.
 	Start() error
+
+	// Stop tells a Publisher to shut down.
+	// No more check results may be published to it after calling Stop.
 	Stop() error
+
+	// Configure sets the configuration to be used by the Publisher.
+	// It should be called before Start.
 	Configure(cfg map[string]interface{}) error
+
+	// Publish accepts a CheckResult to be published.
+	// It should be safe for concurrent calling by multiple goroutines.
 	Publish(*CheckResult) error
 }
 

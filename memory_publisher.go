@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// MemoryPublisher is a simple Publisher which stores all check results in memory.
+// This publisher is used for testing and is not meant to be used normally.
 type MemoryPublisher struct {
 	sync.Mutex
 	log    log.Logger

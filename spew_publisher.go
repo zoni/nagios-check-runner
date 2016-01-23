@@ -7,6 +7,7 @@ import (
 	log "gopkg.in/inconshreveable/log15.v2"
 )
 
+// SpewPublisherConfig describes the configuration used by the SpewPublisher.
 type SpewPublisherConfig struct {
 }
 
