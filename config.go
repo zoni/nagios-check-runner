@@ -10,8 +10,9 @@ import (
 
 // Config describes the full agent configuration.
 type Config struct {
-	Hostname string
-	Checks   map[string]Check
+	Publishers map[string]map[string]interface{}
+	Hostname   string
+	Checks     map[string]Check
 }
 
 // ReadConfig loads configuration from the given source and returns a

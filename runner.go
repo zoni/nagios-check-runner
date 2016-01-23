@@ -12,7 +12,7 @@ import (
 type Runner struct {
 	config      Config
 	checker     *checker
-	publisher   *publisher
+	publishers  map[string]*publisher
 	publishChan chan *CheckResult // The cchannel check results are received from
 	log         log.Logger
 	done        chan struct{} // Used for signalling goroutines that we're shutting down
@@ -52,7 +52,18 @@ func (r *Runner) Init(cfg Config) error {
 	r.log = Log.New("component", "runner")
 	r.checker = &checker{}
 	r.checker.RegisterChecks(r.config.Checks)
-	r.publisher = &publisher{}
+
+	r.publishers = make(map[string]*publisher)
+	for label, config := range cfg.Publishers {
+		p := &publisher{}
+		if err := p.SetConfig(config); err != nil {
+			r.log.Error("Invalid publisher configuration", "publisher", label, "error", err)
+			return err
+		}
+		r.publishers[label] = p
+	}
+	//r.publisher.SetConfig(r.config.Publisher)
+
 	return nil
 }
 
@@ -63,7 +74,9 @@ func (r *Runner) Start() error {
 	r.done = make(chan struct{})
 
 	r.publishChan, _ = r.checker.Start()
-	r.publisher.Start()
+	for _, publisher := range r.publishers {
+		publisher.Start()
+	}
 	go r.process()
 	return nil
 }
@@ -74,7 +87,9 @@ func (r *Runner) process() {
 	for {
 		select {
 		case result := <-r.publishChan:
-			r.publisher.Publish(result)
+			for _, publisher := range r.publishers {
+				publisher.Publish(result)
+			}
 		case <-r.done:
 			return
 		}
@@ -85,7 +100,9 @@ func (r *Runner) process() {
 func (r *Runner) Stop() error {
 	r.log.Info("Runner stopping")
 	r.checker.Stop()
-	r.publisher.Stop()
+	for _, publisher := range r.publishers {
+		publisher.Stop()
+	}
 	return nil
 }
 
