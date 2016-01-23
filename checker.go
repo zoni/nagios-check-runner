@@ -73,8 +73,6 @@ func (c *checker) checkRoutine(check Check) {
 	defer c.wg.Done()
 	l := c.log.New("check", check.Name)
 	l.Debug("Check scheduled", "interval", check.Interval, "retry_interval", check.Retry, "command", check.Command, "timeout", check.Timeout)
-	//time.Sleep(check.Retry * time.Second)
-	//c.publish <- runCheck(Check{})
 	delay := time.Duration(check.Retry) * time.Second
 	for {
 		select {
@@ -99,12 +97,6 @@ func (c *checker) checkRoutine(check Check) {
 
 // runCheck runs a given check and returns the result of its execution.
 func runCheck(check Check) *CheckResult {
-	//dummy := &checkResult{
-	//name:       check.Name,
-	//output:     []byte("Fake output"),
-	//returncode: 1,
-	//}
-	//return dummy
 	checkLog := Log.New("check", check.Name)
 	cmd := exec.Command(check.Args[0], check.Args[1:]...)
 	result := &CheckResult{Name: check.Name}
