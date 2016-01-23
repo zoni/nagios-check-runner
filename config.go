@@ -14,9 +14,9 @@ type Config struct {
 	Checks   map[string]Check
 }
 
-// LoadConfig loads configuration from the given source and returns a
+// ReadConfig loads configuration from the given source and returns a
 // fully initialized Configuration struct from it.
-func LoadConfig(src io.Reader) (*Config, error) {
+func ReadConfig(src io.Reader) (*Config, error) {
 	data, err := ioutil.ReadAll(src)
 	if err != nil {
 		return nil, err

@@ -28,7 +28,7 @@ func init() {
 func TestEmptyConfig(t *testing.T) {
 	a := assert.New(t)
 
-	cfg, err := LoadConfig(strings.NewReader(""))
+	cfg, err := ReadConfig(strings.NewReader(""))
 	require.Nil(t, err)
 
 	a.Equal(0, len(cfg.Checks))
@@ -38,7 +38,7 @@ func TestRegularConfig(t *testing.T) {
 	a := assert.New(t)
 	r := require.New(t)
 
-	cfg, err := LoadConfig(bytes.NewReader(defaultConfig))
+	cfg, err := ReadConfig(bytes.NewReader(defaultConfig))
 	r.Nil(err)
 
 	a.Equal("testhost", cfg.Hostname)
@@ -49,12 +49,12 @@ func TestChecks(t *testing.T) {
 	a := assert.New(t)
 	r := require.New(t)
 
-	_, err := LoadConfig(strings.NewReader("checks: { valid: {command: foo} }"))
+	_, err := ReadConfig(strings.NewReader("checks: { valid: {command: foo} }"))
 	a.Nil(err)
-	_, err = LoadConfig(strings.NewReader("checks: { invalid: {} }"))
+	_, err = ReadConfig(strings.NewReader("checks: { invalid: {} }"))
 	a.NotNil(err)
 
-	cfg, err := LoadConfig(bytes.NewReader(defaultConfig))
+	cfg, err := ReadConfig(bytes.NewReader(defaultConfig))
 	r.Nil(err)
 
 	check, ok := cfg.Checks["Dummy OK"]

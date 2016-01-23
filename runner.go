@@ -34,7 +34,7 @@ func NewRunnerFromFile(filename string) (*Runner, error) {
 		return nil, err
 	}
 	defer f.Close()
-	cfg, err := LoadConfig(f)
+	cfg, err := ReadConfig(f)
 	if err != nil {
 		return nil, err
 	}
