@@ -1,4 +1,3 @@
-
 ---
 
 publishers:
@@ -6,6 +5,10 @@ publishers:
     type: MemoryPublisher
 
 checks:
+  okcheck:
+    command: testdata/check_dummy 0
+    interval: 1
+    retry: 2
   criticalcheck:
     command: testdata/check_dummy 2
     interval: 10

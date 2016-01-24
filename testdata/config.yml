@@ -1,0 +1,22 @@
+
+---
+
+publishers:
+  memory:
+    type: MemoryPublisher
+
+checks:
+  Dummy OK:
+    command: /usr/lib/nagios/plugins/check_dummy 0
+  Dummy WARNING:
+    command: /usr/lib/nagios/plugins/check_dummy 1
+  Dummy CRITICAL:
+    command: /usr/lib/nagios/plugins/check_dummy 2
+  Dummy UNKNOWN:
+    command: /usr/lib/nagios/plugins/check_dummy 3
+  Custom:
+    command: /usr/lib/nagios/plugins/check_dummy 0
+    name: Custom check
+    interval: 10
+    retry: 3
+    timeout: 3

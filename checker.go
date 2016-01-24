@@ -21,6 +21,13 @@ type Check struct {
 	Timeout  int
 }
 
+// CheckResult describes the result of a given check.
+type CheckResult struct {
+	Name       string // Check name
+	Output     []byte // Output returned by the command
+	Returncode int    // Exitcode of the command
+}
+
 // checker is responsible for the scheduling and running of checks.
 type checker struct {
 	publish chan *CheckResult // Channel to publish check results on
@@ -28,13 +35,6 @@ type checker struct {
 	wg      sync.WaitGroup    // Used together with the above to wait until goroutines finished
 	checks  map[string]Check  // The checks that need to be run
 	log     log.Logger
-}
-
-// CheckResult describes the result of a given check.
-type CheckResult struct {
-	Name       string // Check name
-	Output     []byte // Output returned by the command
-	Returncode int    // Exitcode of the command
 }
 
 // RegisterChecks sets the checks to be run. It must be called before

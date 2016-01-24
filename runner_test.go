@@ -29,51 +29,55 @@ func TestPublisherInit(t *testing.T) {
 	a.Equal(expectType, realType)
 }
 
-func TestRunAndPublishChecksCriticalCheck(t *testing.T) {
-	runner, err := NewRunnerFromFile("testdata/criticalcheck.yml")
+func TestRunAndPublishChecks(t *testing.T) {
+	runner, err := NewRunnerFromFile("testdata/runnertest.yml")
 	require.Nil(t, err)
 	publisher := runner.publishers["memory"]
 	p := publisher.(*MemoryPublisher)
 
 	runner.Start()
 	defer runner.Stop()
+
 	time.Sleep(500 * time.Millisecond)
-	if count := p.EventCount(); count != 0 {
-		t.Errorf("Expected eventcount to be 0, not %v", count)
+	if count := p.EventCount("criticalcheck"); count != 0 {
+		t.Errorf("Expected criticalcheck eventcount to be 0, not %v", count)
 	}
+	if count := p.EventCount("okcheck"); count != 0 {
+		t.Errorf("Expected okcheck eventcount to be 0, not %v", count)
+	}
+
 	time.Sleep(550 * time.Millisecond)
-	if count := p.EventCount(); count != 1 {
+	if count := p.EventCount("okcheck"); count != 0 {
+		// Checks are run at retry interval after startup, so should not
+		// trigger until 2 seconds
+		t.Errorf("Expected okcheck eventcount to be 0, not %v", count)
+	}
+	if count := p.EventCount("criticalcheck"); count != 1 {
 		// Checks are run at retry interval after startup, so should have
 		// triggered after 1 second
-		t.Errorf("Expected eventcount to be 1, not %v", count)
+		t.Errorf("Expected criticalcheck eventcount to be 1, not %v", count)
 	}
+
 	time.Sleep(1 * time.Second)
-	if count := p.EventCount(); count != 2 {
-		t.Errorf("Expected eventcount to be 2, not %v", count)
+	if count := p.EventCount("okcheck"); count != 1 {
+		// Okcheck should now have triggered once too, as retry = 2s
+		t.Errorf("Expected okcheck eventcount to be 1, not %v", count)
+	}
+	if count := p.EventCount("criticalcheck"); count != 2 {
+		// Criticalcheck has retry = 1s so should have triggered twice now
+		t.Errorf("Expected criticalcheck eventcount to be 2, not %v", count)
+	}
+
+	time.Sleep(1 * time.Second)
+	if count := p.EventCount("okcheck"); count != 2 {
+		// Last result for okcheck was OK, so should now be
+		// triggering at interval (1s) rather than retry interval (2s)
+		t.Errorf("Expected okcheck eventcount to be 2, not %v", count)
+	}
+	if count := p.EventCount("criticalcheck"); count != 3 {
+		t.Errorf("Expected criticalcheck eventcount to be 3, not %v", count)
 	}
 }
 
-func TestRunAndPublishChecksOkCheck(t *testing.T) {
-	runner, err := NewRunnerFromFile("testdata/okcheck.yml")
-	require.Nil(t, err)
-	publisher := runner.publishers["memory"]
-	p := publisher.(*MemoryPublisher)
-
-	runner.Start()
-	defer runner.Stop()
-	time.Sleep(1500 * time.Millisecond)
-	if count := p.EventCount(); count != 0 {
-		t.Errorf("Expected eventcount to be 0, not %v", count)
-	}
-	time.Sleep(550 * time.Millisecond)
-	if count := p.EventCount(); count != 1 {
-		// Checks are run at retry interval after startup, so should have
-		// triggered after 1 second
-		t.Errorf("Expected eventcount to be 1, not %v", count)
-	}
-	time.Sleep(1 * time.Second)
-	if count := p.EventCount(); count != 2 {
-		// Should now be triggering every second
-		t.Errorf("Expected eventcount to be 2, not %v", count)
-	}
+func assertCheckResult(t *testing.T, expected *CheckResult, actual *CheckResult) {
 }
