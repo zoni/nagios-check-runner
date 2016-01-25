@@ -17,7 +17,12 @@ transmit them to [Sentry](https://getsentry.com).
 Using a PAAS monitoring solution but want to tap into the thousands of Nagios
 plugins already available? Publish results to a webhook as HTTP events.
 
+### Submitting passive check results to Icinga using NSCA-ng
+
 ![Screencast of submitting passive check results using nsca-ng](screencast/nsca.gif)
+
+### Submitting check results to Sentry
+
 ![Screencast of nagios plugins publishing to Sentry](screencast/sentry.gif)
 
 
