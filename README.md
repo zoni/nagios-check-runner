@@ -2,7 +2,7 @@ Nagios check runner
 ===================
 
 
-*Run nagios-compatible plugins locally and publish their results anywhere you can think of*
+*Run nagios-compatible plugins locally and publish their results anywhere you can think of.*
 
 Nagios check runner was originally conceived as a replacement for
 [NRPE](https://exchange.nagios.org/directory/Addons/Monitoring-Agents/NRPE--2D-Nagios-Remote-Plugin-Executor/details),
@@ -16,6 +16,8 @@ transmit them to [Sentry](https://getsentry.com).
 
 Using a PAAS monitoring solution but want to tap into the thousands of Nagios
 plugins already available? Publish results to a webhook as HTTP events.
+
+![Screencast of nagios plugins publishing to Sentry](screencast/sentry.gif)
 
 
 Configuration
@@ -48,11 +50,11 @@ checks:
 ___Checks___ define the checks to be run. The title is the service name and the
 options it takes are as follows:
 
-* *command*: The command to be run
-* *interval*: The interval to run this plugin when it is in OK state
+* *command*: The command to be run.
+* *interval*: The interval to run this plugin when it is in OK state.
 * *retry*: The interval to run this plugin when it returns a state other
 than OK.
-* *timeout*: Kills the process if it does not finish within this time limit
+* *timeout*: Kills the process if it does not finish within this time limit.
 
 ___Publishers___ defines the publishers to which check results should be published.
 The available publishers and their options are detailed below. All entries under
@@ -73,7 +75,7 @@ to `mail`/`sendmail` or some other custom script of your choosing.
 
 Options:
 
-* *cmd*: The path to the script/binary to be run
+* *cmd*: The path to the script/binary to be run.
 * *stdin*: A text template describing what data is to be fed as input over
   stdin to the specified cmd. It uses Go
   [text/template](https://golang.org/pkg/text/template/) templating.
