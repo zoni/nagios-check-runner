@@ -21,6 +21,10 @@ plugins already available? Publish results to a webhook as HTTP events.
 
 ![Screencast of submitting passive check results using nsca-ng](screencast/nsca.gif)
 
+*Note: If you look closely you'll see a delay in between the check result being submitted
+and the service state updating in Icinga. This is not a bug in the runner but a delay in
+NSCA-ng submitting the event to Icinga and Icinga's event loop picking up the change.*
+
 ### Submitting check results to Sentry
 
 ![Screencast of nagios plugins publishing to Sentry](screencast/sentry.gif)
