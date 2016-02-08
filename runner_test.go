@@ -1,4 +1,4 @@
-package nca
+package ncr
 
 import (
 	"gopkg.in/stretchr/testify.v1/assert"

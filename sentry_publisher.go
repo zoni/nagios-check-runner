@@ -1,4 +1,4 @@
-package nca
+package ncr
 
 import (
 	"errors"
