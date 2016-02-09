@@ -41,7 +41,7 @@ publishers:
     type: ExecPublisher
     cmd: /usr/sbin/send_nsca
     stdin: |
-        "myhost	{{ .Name }}	{{ .Returncode }}	{{ .Output | printf "%s" }}
+        myhost	{{ .Name }}	{{ .Returncode }}	{{ .Output | printf "%s" }}
 
 checks:
   Local SMTP:
