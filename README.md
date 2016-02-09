@@ -102,3 +102,30 @@ Options:
 * *dsn*: The DSN of the project to submit to.
 * *hostname (optional)*: The hostname to report to sentry.
 
+
+Building
+--------
+
+* Make sure you have [setup Go](https://golang.org/dl/).
+* Make sure you have setup a workspace.
+  * If you haven't:
+  * `mkdir ~/go`
+  * `export GOPATH=~/go`
+* Get the source: `go get github.com/zoni/nagios-check-runner`
+* Change into the source directory: `cd $GOPATH/src/github.com/zoni/nagios-check-runner`
+* Get missing dependencies: `go get ./...`
+* Build the binary: `go build cmd/ncr.go`
+* The binary will be available as `./ncr`
+
+
+Testing
+-------
+
+* Follow the instructions under *Building* to set up a correct source tree.
+* Then: `go test -race -cover`
+
+
+License
+-------
+
+The MIT license. See [LICENSE](/LICENSE) for full license text.
