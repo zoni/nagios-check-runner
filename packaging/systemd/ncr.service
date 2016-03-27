@@ -1,0 +1,9 @@
+[Unit]
+Description=Nagios Check Runner
+After=network.target
+
+[Service]
+ExecStart=/opt/ncr/ncr --config /etc/ncr/ncr.yml
+KillMode=process
+Restart=on-failure
+User=ncr

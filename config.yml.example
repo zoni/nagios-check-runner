@@ -1,0 +1,19 @@
+publishers:
+  nsca_ng:
+    type: ExecPublisher
+    cmd: /usr/sbin/send_nsca
+    stdin: |
+        myhost	{{ .Name }}	{{ .Returncode }}	{{ .Output | printf "%s" }}
+
+checks:
+  Local SMTP:
+    command: /usr/lib/nagios/plugins/check_smtp -H localhost
+    interval: 30
+    retry: 10
+    timeout: 3
+
+  System load:
+    command: /usr/lib/nagios/plugins/check_load -r -w 3,2,2 -c 5,3,3
+    interval: 60
+    retry: 60
+    timeout: 10

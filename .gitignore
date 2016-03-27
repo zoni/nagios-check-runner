@@ -1,2 +1,4 @@
 /config.yml
 ncr
+*.deb
+_workarea
