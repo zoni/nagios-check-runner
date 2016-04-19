@@ -1,7 +1,7 @@
 .PHONY: all get build strip test deb
 
 NAME := ncr
-VERSION := 0.0.2
+VERSION := 0.0.3
 ARCH := x86_64
 MAINTAINER := Nick Groenen <nick@groenen.me>
 DESCRIPTION := Nagios Check Runner

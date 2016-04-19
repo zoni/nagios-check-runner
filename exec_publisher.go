@@ -59,6 +59,7 @@ func (p *ExecPublisher) Publish(result *CheckResult) error {
 	}
 	if err = p.stdinTemplate.Execute(stdin, result); err != nil {
 		p.log.Error("Failed to write template data to stdin", "error", err)
+		cmd.Wait() // Avoid zombies
 		return err
 	}
 	stdin.Close()
